@@ -5,11 +5,11 @@ import ApproveHours from './ApproveHours';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter> // create router
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/send-hours" element={<SendHours />} />
-        <Route path="/approve-hours" element={<ApproveHours />} />
+        <Route path="/" element={<Login />} />// path to login page
+        <Route path="/send-hours" element={<SendHours />} />// path to send Hours
+        <Route path="/approve-hours" element={<ApproveHours />} />// path to approveHours
       </Routes>
     </BrowserRouter>
   );
