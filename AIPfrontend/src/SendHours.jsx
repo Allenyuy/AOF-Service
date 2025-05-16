@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 
 function SendHours() {
+  // State to store logged-in user info
   const [user, setUser] = useState(null);
+
+  // State for the form input fields
   const [form, setForm] = useState({
     requester: '',
     verifier: '',
@@ -9,10 +12,13 @@ function SendHours() {
     hours: '',
     description: '',
   });
+
+  // States for UI feedback
   const [response, setResponse] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Runs once on component mount to fetch user info from localStorage and server
   useEffect(() => {
     const email = localStorage.getItem('userEmail');
     if (!email) {
@@ -20,12 +26,15 @@ function SendHours() {
       return;
     }
 
+    // Fetch user data from backend using stored email
     const fetchUser = async () => {
       try {
         const res = await fetch(`http://localhost:8080/users/${email}`);
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         setUser(data);
+
+        // Pre-fill form with user info
         setForm(prev => ({
           ...prev,
           requester: data.email,
@@ -39,16 +48,20 @@ function SendHours() {
     fetchUser();
   }, []);
 
+  // Handle input field changes
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Handle form submission
   const sendHours = async () => {
+    // Basic validation
     if (!form.verifier || !form.hours || !form.description) {
       setResponse('Please fill in all fields.');
       return;
     }
 
+    // Ensure hours is a number
     const parsedHours = Number(form.hours);
     if (isNaN(parsedHours)) {
       setResponse('Hours must be a number.');
@@ -57,6 +70,7 @@ function SendHours() {
 
     setLoading(true);
     try {
+      // Send POST request with the form data
       const res = await fetch('http://localhost:8080/sendHours', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -65,6 +79,8 @@ function SendHours() {
 
       if (!res.ok) throw new Error(await res.text());
       await res.json();
+
+      // Display success message
       setResponse('Hours submitted successfully.');
     } catch (err) {
       setResponse(`Error: ${err.message}`);
@@ -73,8 +89,10 @@ function SendHours() {
     }
   };
 
+  // Display error if user email is missing or fetch failed
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
+  // Main form UI
   return (
     <div style={{
       display: 'flex',
@@ -95,9 +113,11 @@ function SendHours() {
         textAlign: 'center',
         color: 'black'
       }}>
+        {/* Welcome header with user name */}
         <h2>Welcome{user ? `, ${user.name}` : ''}!</h2>
         <p><strong>Total Hours:</strong> {user?.hours ?? 'Loading...'}</p>
 
+        {/* Submission form */}
         <h3>Submit Hours</h3>
         <input
           name="verifier"
@@ -133,6 +153,7 @@ function SendHours() {
           {loading ? 'Sending...' : 'Submit'}
         </button>
 
+        {/* Response message after submission */}
         {response && <p style={{ marginTop: '1rem', color: response.startsWith('Error') ? 'red' : 'green' }}>{response}</p>}
       </div>
     </div>
